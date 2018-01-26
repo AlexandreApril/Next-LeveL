@@ -859,7 +859,7 @@ class Engine {
     }
     isPlayerDead() {
         var isDead = false;
-        return false;
+        // return false;
         //if ((LEVEL === 2) || (LEVEL > 3)) {
         if (this.boss) {
             this.boss.forEach((boss) => {
