@@ -24,15 +24,15 @@ var BOSS_HP = 20;
 var BOSS_HP_UPDATE = 20;
 var NUMBER_TIMES_BOSS_DIED = 0;
 // Basic enemy stats, multiplied by four
-var MAX_ALIENS = 5;
+var MAX_ALIENS = 2;
 var MAX_ALIENS_UPDATE = 5;
 var NUMBER_WAVES_ALIENS_KILLED = 0;
 var NUMBER_ALIENS_IN_WAVE = 5;
 // Asteroid stats, multiplied by four
 // TOP - BOTTOM have a max of 45 spots
 // LEFT - RIGHT have a max of 29 spots
-var MAX_ASTEROIDS_TOP_BOTTOM = 30;
-var MAX_ASTEROIDS_LEFT_RIGHT = 15;
+var MAX_ASTEROIDS_TOP_BOTTOM = 20;
+var MAX_ASTEROIDS_LEFT_RIGHT = 10;
 // Beam constants
 var MAX_BEAMS = 2;
 //var BEAM_SOUND = new sound("Pew_Pew.mp3");
@@ -582,35 +582,7 @@ class Engine {
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
         this.ctx.drawImage(backgroundImages['background level 5.jpg'], 0, 0);
-        /*
-                if (LEVEL === 1) {
-                    this.ctx.drawImage(images['background level 1.jpg'], 0, 0);
-                }
-                if (LEVEL === 2) {
-                    this.ctx.drawImage(images['background level 2.jpg'], 0, 0);
-                    this.setUpBoss();
-                    this.boss.forEach(e => e.update(this.player.x, this.player.y));
-                    this.boss.forEach(e => e.render(this.ctx, counter));
-                }
         
-                if (LEVEL === 3) {
-                    this.ctx.drawImage(images['background level 3.jpg'], 0, 0);
-                }
-        
-                if (LEVEL === 4) {
-                    this.ctx.drawImage(images['background level 4.jpg'], 0, 0);
-                    this.setUpBoss();
-                    this.boss.forEach(e => e.update(this.player.x, this.player.y));
-                    this.boss.forEach(e => e.render(this.ctx, counter));
-                }
-        
-                if (LEVEL === 5) {
-                    this.ctx.drawImage(images['background level 5.jpg'], 0, 0);
-                    this.setUpBoss();
-                    this.boss.forEach(e => e.update(this.player.x, this.player.y));
-                    this.boss.forEach(e => e.render(this.ctx, counter));
-                }
-        */
         if (this.beamDir) {
             this.beamDir.update(timeDiff);
             this.beamDir.render(this.ctx);
@@ -693,11 +665,6 @@ class Engine {
                                     NUMBER_TIMES_BOSS_DIED += 1;
                                     BOSS_HP_UPDATE += 20;
                                     BOSS_HP = BOSS_HP_UPDATE;
-                                    if (NUMBER_TIMES_BOSS_DIED === 5); {
-                                        this.gameWon();
-                                    }
-                                    // BOSS_HP = 4 * LEVEL * LEVEL;
-                                    // levelOver();
                                     this.setUpBoss();
                                 }
                             }
@@ -847,15 +814,6 @@ class Engine {
             this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
             requestAnimationFrame(this.gameLoop);
         }
-    }
-    gameWon() {
-        this.ctx.drawImage(backgroundImages['game won.jpg'], 0, 0);
-        this.ctx.font = 'bold 100px Impact';
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
-        document.addEventListener("click", e => {
-            alert("CONGRATZ BRO! NOW START OVER!");
-        });
     }
     isPlayerDead() {
         var isDead = false;
