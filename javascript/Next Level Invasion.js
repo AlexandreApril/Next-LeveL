@@ -1,3 +1,4 @@
+var body = document.getElementById('bodyBackground');
 // Constants
 // Codes for the controles of the game
 // Prevents the use of these numbers elsewhere
@@ -23,16 +24,15 @@ var PLAYER_STARTING_POSITION_Y = (GAME_HEIGHT - ENTITY_DIMENSIONS) / 2;
 var BOSS_HP = 20;
 var BOSS_HP_UPDATE = 20;
 var NUMBER_TIMES_BOSS_DIED = 0;
-// Basic enemy stats, multiplied by four
-var MAX_ALIENS = 2;
+// Basic enemy stats
+var alienCounter = 0;
+var MAX_ALIENS = 8;
 var MAX_ALIENS_UPDATE = 5;
 var NUMBER_WAVES_ALIENS_KILLED = 0;
 var NUMBER_ALIENS_IN_WAVE = 5;
-// Asteroid stats, multiplied by four
-// TOP - BOTTOM have a max of 45 spots
-// LEFT - RIGHT have a max of 29 spots
-var MAX_ASTEROIDS_TOP_BOTTOM = 20;
-var MAX_ASTEROIDS_LEFT_RIGHT = 10;
+// Asteroid stats
+var asteroidCounter = 1;
+var MAX_ASTEROIDS = 10;
 // Beam constants
 var MAX_BEAMS = 2;
 //var BEAM_SOUND = new sound("Pew_Pew.mp3");
@@ -113,159 +113,94 @@ function randomAsteroid() {
 function setUpBeam(currentDir, xPlayerPos, yPlayerPos) {
     if (!this.beamExist) { this.beamExist = []; }
     switch (currentDir) {
-        case 1:
-            this.beamDir = this.beamExist.push(xPlayerPos);
-        case 2:
-            this.beamDir = this.beamExist.push(xPlayerPos);
-        case 3:
-            this.beamDir = this.beamExist.push(yPlayerPos);
-        case 4:
-            this.beamDir = this.beamExist.push(yPlayerPos);
+        case 1: this.beamDir = this.beamExist.push(xPlayerPos);
+        case 2: this.beamDir = this.beamExist.push(xPlayerPos);
+        case 3: this.beamDir = this.beamExist.push(yPlayerPos);
+        case 4: this.beamDir = this.beamExist.push(yPlayerPos);
     }
     this.beamDir = new Beam(currentDir, xPlayerPos, yPlayerPos);
 }
-// Allows every entity to be rendered with every game loop
-class Render {
-    render(ctx) { ctx.drawImage(this.sprite, this.x, this.y); }
-}
-// Gives the Boss it's spawn location, speed, and positional update
-// Maybe lets it have an alernating image
+
+class Render { render(ctx) { ctx.drawImage(this.sprite, this.x, this.y); } }
+
 class Boss {
     constructor() {
         this.x = (Math.round(Math.random())) * GAME_WIDTH;
         this.y = (Math.round(Math.random())) * GAME_HEIGHT;
     }
     update(xPlayerPos, yPlayerPos) {
-        if (this.y === yPlayerPos) { this.y = this.y; }
-        else if (this.y > yPlayerPos) { this.y -= 5; }
-        else if (this.y < yPlayerPos) { this.y += 5; }
-        if (this.x === xPlayerPos) { this.x = this.x; }
-        else if (this.x > xPlayerPos) { this.x -= 5; }
-        else if (this.x < xPlayerPos) { this.x += 5; }
+        this.x > xPlayerPos ? this.x -= 5 : this.x < xPlayerPos ? this.x += 5 : this.x;
+        this.y > yPlayerPos ? this.y -= 5 : this.y < yPlayerPos ? this.y += 5 : this.y;
     }
     render(ctx, counter) {
-        if (counter < 25) { ctx.drawImage(bossImages['Sinistar Boss 1.png'], this.x - 200, this.y - 200); /*++counter;*/ }
-        if (25 <= counter ) { ctx.drawImage(bossImages['Sinistar Boss 2.png'], this.x - 200, this.y - 200); /*++counter;*/ }
-        //if (counter < 202) { ctx.drawImage(bossImages['Boss Dead.png'], this.x - 200, this.y - 200); /*++counter;*/ }
+        if (counter < 25) { ctx.drawImage(bossImages['Sinistar Boss 1.png'], this.x - 200, this.y - 200); }
+        if (25 <= counter) { ctx.drawImage(bossImages['Sinistar Boss 2.png'], this.x - 200, this.y - 200); }
     }
 }
 
-class TopAlien extends Render {
-    constructor(alienPos) {
+class Alien extends Render {
+    constructor(alienPos, alienSide) {
         super();
-        this.x = alienPos;
-        this.y = 0 - ENTITY_DIMENSIONS;
         this.sprite = enemyImages[randomAlien()];
+        switch (alienSide) {
+            case 0:
+                this.x = alienPos;
+                this.y = -ENTITY_DIMENSIONS;
+                break;
+            case 1:
+                this.x = alienPos;
+                this.y = GAME_HEIGHT + ENTITY_DIMENSIONS;
+                break;
+            case 2:
+                this.x = -ENTITY_DIMENSIONS;
+                this.y = alienPos;
+                break;
+            case 3:
+                this.x = GAME_WIDTH + ENTITY_DIMENSIONS;
+                this.y = alienPos;
+                break;
+        }
     }
     update(xPlayerPos, yPlayerPos) {
-        if (this.y === yPlayerPos) { this.y = this.y; }
-        else if (this.y > yPlayerPos) { this.y -= 3; }
-        else if (this.y < yPlayerPos) { this.y += 3; }
-        if (this.x === xPlayerPos) { this.x = this.x; }
-        else if (this.x > xPlayerPos) { this.x -= 3; }
-        else if (this.x < xPlayerPos) { this.x += 3; }
-    }
-}
-class BottomAlien extends Render {
-    constructor(alienPos) {
-        super();
-        this.x = alienPos;
-        this.y = GAME_HEIGHT + ENTITY_DIMENSIONS;
-        this.sprite = enemyImages[randomAlien()];
-    }
-    update(xPlayerPos, yPlayerPos) {
-        if (this.y === yPlayerPos) { this.y = this.y; }
-        else if (this.y > yPlayerPos) { this.y -= 3; }
-        else if (this.y < yPlayerPos) { this.y += 3; }
-        if (this.x === xPlayerPos) { this.x = this.x; }
-        else if (this.x > xPlayerPos) { this.x -= 3; }
-        else if (this.x < xPlayerPos) { this.x += 3; }
-    }
-}
-class LeftAlien extends Render {
-    constructor(alienPos) {
-        super();
-        this.x = 0 - ENTITY_DIMENSIONS;
-        this.y = alienPos;
-        this.sprite = enemyImages[randomAlien()];
-    }
-    update(xPlayerPos, yPlayerPos) {
-        if (this.y === yPlayerPos) { this.y = this.y; }
-        else if (this.y > yPlayerPos) { this.y -= 3; }
-        else if (this.y < yPlayerPos) { this.y += 3; }
-        if (this.x === xPlayerPos) { this.x = this.x; }
-        else if (this.x > xPlayerPos) { this.x -= 3; }
-        else if (this.x < xPlayerPos) { this.x += 3; }
-    }
-}
-class RightAlien extends Render {
-    constructor(alienPos) {
-        super();
-        this.x = GAME_WIDTH + ENTITY_DIMENSIONS;
-        this.y = alienPos;
-        this.sprite = enemyImages[randomAlien()];
-    }
-    update(xPlayerPos, yPlayerPos) {
-        if (this.y === yPlayerPos) { this.y = this.y; }
-        else if (this.y > yPlayerPos) { this.y -= 3; }
-        else if (this.y < yPlayerPos) { this.y += 3; }
-        if (this.x === xPlayerPos) { this.x = this.x; }
-        else if (this.x > xPlayerPos) { this.x -= 3; }
-        else if (this.x < xPlayerPos) { this.x += 3; }
-    }
-}
-class TopAsteroid extends Render {
-    constructor(xTopPos) {
-        super();
-        this.x = xTopPos;
-        this.y = 0;
-        this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = (Math.random() / 1.5);
-    }
-    update(timeDiff) {
-        this.y = this.y + (timeDiff * this.speed);
+        this.x > xPlayerPos ? this.x -= 3 : this.x < xPlayerPos ? this.x += 3 : this.x;
+        this.y > yPlayerPos ? this.y -= 3 : this.y < yPlayerPos ? this.y += 3 : this.y;
     }
 }
 
-class BottomAsteroid extends Render {
-    constructor(xBottomPos) {
+class Asteroid extends Render {
+    constructor(asteroidPos, aCounter) {
         super();
-        this.x = xBottomPos;
-        this.y = GAME_HEIGHT - ENTITY_DIMENSIONS;
         this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = (Math.random() / 1.5);
+        this.speed = Math.random() / 1.5;
+        this.thing = aCounter;
+        switch (aCounter) {
+            case 1:
+                this.x = asteroidPos;
+                this.y = 0;
+                break;
+            case 2:
+                this.x = asteroidPos;
+                this.y = GAME_HEIGHT - ENTITY_DIMENSIONS;
+                break;
+            case 3:
+                this.x = 0;
+                this.y = asteroidPos;
+                break;
+            case 4:
+                this.x = GAME_WIDTH - ENTITY_DIMENSIONS;
+                this.y = asteroidPos;
+                break;
+        }
     }
     update(timeDiff) {
-        this.y = this.y - (timeDiff * this.speed);
+        switch (this.thing) {
+            case 1: return this.y = this.y + (timeDiff * this.speed);
+            case 2: return this.y = this.y - (timeDiff * this.speed);
+            case 3: return this.x = this.x + (timeDiff * this.speed);
+            case 4: return this.x = this.x - (timeDiff * this.speed);
+        }
     }
 }
-
-class LeftAsteroid extends Render {
-    constructor(xLeftPos) {
-        super();
-        this.y = xLeftPos;
-        this.x = 0;
-        this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = (Math.random() / 1.5);
-    }
-    update(timeDiff) {
-        this.x = this.x + (timeDiff * this.speed);
-    }
-}
-
-class RightAsteroid extends Render {
-    constructor(xRightPos) {
-        super();
-        this.y = xRightPos;
-        this.x = GAME_WIDTH - ENTITY_DIMENSIONS;
-        this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = (Math.random() / 1.5);
-    }
-    update(timeDiff) {
-        this.x = this.x - (timeDiff * this.speed);
-    }
-}
-
 class Player extends Render {
     constructor() {
         super();
@@ -301,7 +236,7 @@ class Player extends Render {
 class Beam extends Render {
     constructor(currentDir, xPlayerPos, yPlayerPos) {
         super();
-        this.speed = 5/* * LEVEL*/;
+        this.speed = 5;
         switch (currentDir) {
             case 1:
                 this.currentDir = currentDir;
@@ -329,7 +264,6 @@ class Beam extends Render {
                 break;
         }
     }
-
     update(timeDiff) {
         switch (this.currentDir) {
             case 1: return this.y = this.y - (timeDiff * this.speed);
@@ -350,19 +284,9 @@ class Engine {
         // Setup the player
         this.player = new Player();
 
-
         this.setUpBoss();
-
-        this.setupTopAliens();
-        this.setupBottomAliens();
-        this.setupLeftAliens();
-        this.setupRightAliens();
-
-        // Setup asteroids
-        this.setupTopAsteroids();
-        this.setupBottomAsteroids();
-        this.setupLeftAsteroids();
-        this.setupRightAsteroids();
+        this.setupAliens();
+        this.setupAsteroids();
 
         // Setup the <canvas> element where we will be drawing
         var canvas = document.createElement('canvas');
@@ -381,171 +305,43 @@ class Engine {
         }
     }
 
-    setupTopAliens() {
-        if (!this.topAliens) {
-            this.topAliens = [];
-        }
-        while (this.topAliens.filter(e => !!e).length < MAX_ALIENS/* * LEVEL*/) {
-            this.addTopAlien();
-        }
+    setupAliens() {
+        if (!this.aliens) { this.aliens = []; }
+        while (this.aliens.filter(e => !!e).length < MAX_ALIENS) { this.addAlien(); }
     }
-    addTopAlien() {
-        var topAlienSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var topAlienSpot;
-
-        while (!topAlienSpot || this.topAliens[topAlienSpot]) {
-            topAlienSpot = Math.floor(Math.random() * topAlienSpots);
-        }
-        this.topAliens[topAlienSpot] = new TopAlien((topAlienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
+    addAlien() {
+        var alienSpots = 30;
+        var alienSpot;
+        ++alienCounter;
+        if (alienCounter === 4) { alienCounter = 0; }
+        while (!alienSpot || this.aliens[alienSpot]) { alienSpot = Math.floor(Math.random() * alienSpots); }
+        this.aliens[alienSpot] = new Alien((alienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS, alienCounter);
     }
-    setupBottomAliens() {
-        if (!this.bottomAliens) {
-            this.bottomAliens = [];
-        }
-        while (this.bottomAliens.filter(e => !!e).length < MAX_ALIENS/* * LEVEL*/) {
-            this.addBottomAlien();
-        }
+    setupAsteroids() {
+        if (!this.asteroids) { this.asteroids = []; }
+        while (this.asteroids.filter(e => !!e).length < MAX_ASTEROIDS) { this.addAsteroid(); }
     }
-    addBottomAlien() {
-        var bottomAlienSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var bottomAlienSpot;
-
-        while (!bottomAlienSpot || this.bottomAliens[bottomAlienSpot]) {
-            bottomAlienSpot = Math.floor(Math.random() * bottomAlienSpots);
-        }
-        this.bottomAliens[bottomAlienSpot] = new BottomAlien((bottomAlienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
+    addAsteroid() {
+        if (asteroidCounter === 5) { asteroidCounter = 1; }
+        var asteroidSpots = 30;
+        var asteroidSpot;
+        while (!asteroidSpot || this.asteroids[asteroidSpot]) { asteroidSpot = Math.floor(Math.random() * asteroidSpots); }
+        this.asteroids[asteroidSpot] = new Asteroid(((asteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS), asteroidCounter);
+        ++asteroidCounter;
     }
-    setupLeftAliens() {
-        if (!this.leftAliens) {
-            this.leftAliens = [];
-        }
-        while (this.leftAliens.filter(e => !!e).length < MAX_ALIENS/* * LEVEL*/) {
-            this.addLeftAlien();
-        }
-    }
-    addLeftAlien() {
-        var leftAlienSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var leftAlienSpot;
-
-        while (!leftAlienSpot || this.leftAliens[leftAlienSpot]) {
-            leftAlienSpot = Math.floor(Math.random() * leftAlienSpots);
-        }
-        this.leftAliens[leftAlienSpot] = new LeftAlien((leftAlienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-    setupRightAliens() {
-        if (!this.rightAliens) {
-            this.rightAliens = [];
-        }
-        while (this.rightAliens.filter(e => !!e).length < MAX_ALIENS/* * LEVEL*/) {
-            this.addRightAlien();
-        }
-    }
-    addRightAlien() {
-        var rightAlienSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var rightAlienSpot;
-
-        while (!rightAlienSpot || this.rightAliens[rightAlienSpot]) {
-            rightAlienSpot = Math.floor(Math.random() * rightAlienSpots);
-        }
-        this.rightAliens[rightAlienSpot] = new RightAlien((rightAlienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-
-    setupTopAsteroids() {
-        if (!this.topAsteroids) {
-            this.topAsteroids = [];
-        }
-
-        while (this.topAsteroids.filter(e => !!e).length < (/*(*/MAX_ASTEROIDS_TOP_BOTTOM/* * LEVEL) - 5*/)) {
-            this.addTopAsteroid();
-        }
-    }
-    addTopAsteroid() {
-        var topAsteroidSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var topAsteroidSpot;
-        while (!topAsteroidSpot || this.topAsteroids[topAsteroidSpot]) {
-            topAsteroidSpot = Math.floor(Math.random() * topAsteroidSpots);
-        }
-
-        this.topAsteroids[topAsteroidSpot] = new TopAsteroid((topAsteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-    setupBottomAsteroids() {
-        if (!this.bottomAsteroids) {
-            this.bottomAsteroids = [];
-        }
-
-        while (this.bottomAsteroids.filter(e => !!e).length < (/*(*/MAX_ASTEROIDS_TOP_BOTTOM /** LEVEL) - 5*/)) {
-            this.addBottomAsteroid();
-        }
-    }
-    addBottomAsteroid() {
-        var bottomAsteroidSpots = (GAME_WIDTH / ENTITY_DIMENSIONS) + 1;
-        var bottomAsteroidSpot;
-        while (!bottomAsteroidSpot || this.bottomAsteroids[bottomAsteroidSpot]) {
-            bottomAsteroidSpot = Math.floor(Math.random() * bottomAsteroidSpots);
-        }
-
-        this.bottomAsteroids[bottomAsteroidSpot] = new BottomAsteroid((bottomAsteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-    setupLeftAsteroids() {
-        if (!this.leftAsteroids) {
-            this.leftAsteroids = [];
-        }
-
-        while (this.leftAsteroids.filter(e => !!e).length < (/*(*/MAX_ASTEROIDS_LEFT_RIGHT/* * LEVEL) - 5*/)) {
-            this.addLeftAsteroid();
-        }
-    }
-    addLeftAsteroid() {
-        var leftAsteroidSpots = (GAME_HEIGHT / ENTITY_DIMENSIONS) + 1;
-        var leftAsteroidSpot;
-        while (!leftAsteroidSpot || this.leftAsteroids[leftAsteroidSpot]) {
-            leftAsteroidSpot = Math.floor(Math.random() * leftAsteroidSpots);
-        }
-
-        this.leftAsteroids[leftAsteroidSpot] = new LeftAsteroid((leftAsteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-    setupRightAsteroids() {
-        if (!this.rightAsteroids) {
-            this.rightAsteroids = [];
-        }
-
-        while (this.rightAsteroids.filter(e => !!e).length < (/*(*/MAX_ASTEROIDS_LEFT_RIGHT/* * LEVEL) - 5*/)) {
-            this.addRightAsteroid();
-        }
-    }
-    addRightAsteroid() {
-        var rightAsteroidSpots = (GAME_HEIGHT / ENTITY_DIMENSIONS) + 1;
-        var rightAsteroidSpot;
-        while (!rightAsteroidSpot || this.rightAsteroids[rightAsteroidSpot]) {
-            rightAsteroidSpot = Math.floor(Math.random() * rightAsteroidSpots);
-        }
-
-        this.rightAsteroids[rightAsteroidSpot] = new RightAsteroid((rightAsteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS);
-    }
-
     // This method kicks off the game
     start() {
-        this.numberOfSinistars =
-            this.lastFrame = Date.now();
+        this.lastFrame = Date.now();
         if (!this.player.arrowPressed) { this.player.arrowPressed = 1 }
         // Listen for keyboard up/down/left/right/spacebar and update the player
         document.addEventListener('keydown', e => {
-            if (e.keyCode === UP_ARROW_CODE) {
-                this.player.move(MOVE_UP);
-            }
-            else if (e.keyCode === DOWN_ARROW_CODE) {
-                this.player.move(MOVE_DOWN);
-            }
-            else if (e.keyCode === LEFT_ARROW_CODE) {
-                this.player.move(MOVE_LEFT);
-            }
-            else if (e.keyCode === RIGHT_ARROW_CODE) {
-                this.player.move(MOVE_RIGHT);
-            }
+            if (e.keyCode === UP_ARROW_CODE) { this.player.move(MOVE_UP); }
+            else if (e.keyCode === DOWN_ARROW_CODE) { this.player.move(MOVE_DOWN); }
+            else if (e.keyCode === LEFT_ARROW_CODE) { this.player.move(MOVE_LEFT); }
+            else if (e.keyCode === RIGHT_ARROW_CODE) { this.player.move(MOVE_RIGHT); }
             else if (e.keyCode === SPACE_BAR_CODE) {
                 if (!this.beamDir) {
                     this.beamExist = [];
-
                     switch (this.player.arrowPressed) {
                         case 1:
                             this.player.sprite = playerImages['player shooting up.png'];
@@ -566,407 +362,122 @@ class Engine {
                     }
                 }
             }
-            else if (e.keyCode === ENTER_CODE) {
-                location.reload();
-            }
+            else if (e.keyCode === ENTER_CODE) { location.reload(); }
         });
         this.gameLoop();
     }
 
     gameLoop() {
+        var connect = false;
         counter += 1;
-        if(counter === 50) {
-            counter = 0;
-        }
+        if (counter === 50) { counter = 0; }
         // Check how long it's been since last frame
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
         this.ctx.drawImage(backgroundImages['background level 5.jpg'], 0, 0);
-        
+
         if (this.beamDir) {
             this.beamDir.update(timeDiff);
             this.beamDir.render(this.ctx);
         }
 
-
-        this.topAliens.forEach(topAlien => topAlien.update(this.player.x, this.player.y));
-        this.bottomAliens.forEach(bottomAlien => bottomAlien.update(this.player.x, this.player.y));
-        this.leftAliens.forEach(leftAlien => leftAlien.update(this.player.x, this.player.y));
-        this.rightAliens.forEach(rightAlien => rightAlien.update(this.player.x, this.player.y));
-
-        this.topAliens.forEach(topAlien => topAlien.render(this.ctx));
-        this.bottomAliens.forEach(bottomAlien => bottomAlien.render(this.ctx));
-        this.leftAliens.forEach(leftAlien => leftAlien.render(this.ctx));
-        this.rightAliens.forEach(rightAlien => rightAlien.render(this.ctx));
-
-        this.topAsteroids.forEach(topAsteroid => topAsteroid.update(timeDiff));
-        this.bottomAsteroids.forEach(bottomAsteroid => bottomAsteroid.update(timeDiff));
-        this.leftAsteroids.forEach(leftAsteroid => leftAsteroid.update(timeDiff));
-        this.rightAsteroids.forEach(rightAsteroid => rightAsteroid.update(timeDiff));
-
-        this.topAsteroids.forEach(topAsteroid => topAsteroid.render(this.ctx));
-        this.bottomAsteroids.forEach(bottomAsteroid => bottomAsteroid.render(this.ctx))
-        this.leftAsteroids.forEach(leftAsteroid => leftAsteroid.render(this.ctx));
-        this.rightAsteroids.forEach(rightAsteroid => rightAsteroid.render(this.ctx));
-
-
+        this.aliens.forEach(alien => alien.update(this.player.x, this.player.y));
+        this.aliens.forEach(alien => alien.render(this.ctx));
+        this.asteroids.forEach(asteroid => asteroid.update(timeDiff));
+        this.asteroids.forEach(asteroid => asteroid.render(this.ctx));
         this.player.render(this.ctx);
-
         this.boss.forEach(e => e.update(this.player.x, this.player.y));
         this.boss.forEach(e => e.render(this.ctx, counter));
-
-
-        this.topAsteroids.forEach((topAsteroid, topAsteroidIdx) => {
-            if (topAsteroid.y > GAME_HEIGHT) {
-                delete this.topAsteroids[topAsteroidIdx];
-            }
-        });
-        this.setupTopAsteroids();
-        this.bottomAsteroids.forEach((bottomAsteroid, bottomAsteroidIdx) => {
-            if (bottomAsteroid.y < - ENTITY_DIMENSIONS) {
-                delete this.bottomAsteroids[bottomAsteroidIdx];
-            }
-        });
-        this.setupBottomAsteroids();
-        this.leftAsteroids.forEach((leftAsteroid, leftAsteroidIdx) => {
-            if (leftAsteroid.x > GAME_WIDTH) {
-                delete this.leftAsteroids[leftAsteroidIdx];
-            }
-        });
-        this.setupLeftAsteroids();
-        this.rightAsteroids.forEach((rightAsteroid, rightAsteroidIdx) => {
-            if (rightAsteroid.x < - ENTITY_DIMENSIONS) {
-                delete this.rightAsteroids[rightAsteroidIdx];
-            }
-        });
-        this.setupRightAsteroids();
-
-
+        this.asteroids.forEach((asteroid, asteroidIdx) => { asteroid.y > GAME_HEIGHT + ENTITY_DIMENSIONS ? delete this.asteroids[asteroidIdx] : asteroid.y < -(ENTITY_DIMENSIONS * 2) ? delete this.asteroids[asteroidIdx] : asteroid.x > GAME_WIDTH + ENTITY_DIMENSIONS ? delete this.asteroids[asteroidIdx] : asteroid.x < -(ENTITY_DIMENSIONS * 2) ? delete this.asteroids[asteroidIdx] : false; });
+        this.setupAsteroids();
 
         if (this.beamDir) {
-            var connect = false;
-            if (this.beamDir.x < 0 - ENTITY_DIMENSIONS) { connect = true; }
-            if (this.beamDir.x > GAME_WIDTH) { connect = true; }
-            if (this.beamDir.y < 0 - ENTITY_DIMENSIONS) { connect = true; }
-            if (this.beamDir.y > GAME_HEIGHT) { connect = true; }
-
-            //if ((LEVEL === 2) || (LEVEL > 3)) {
+            this.beamDir.x < -ENTITY_DIMENSIONS ? delete this.beamDir : this.beamDir.x > GAME_WIDTH ? delete this.beamDir : this.beamDir.y < -ENTITY_DIMENSIONS ? delete this.beamDir : this.beamDir.y > GAME_HEIGHT ? delete this.beamDir : connect;
             this.boss.forEach((boss) => {
-                if (boss.x + 200 >= this.beamDir.x) {
-                    if (boss.x <= this.beamDir.x + 200) {
-                        if (boss.y + 200 >= this.beamDir.y) {
-                            if (boss.y <= this.beamDir.y + 200) {
-                                connect = true;
-                                BOSS_HP -= 1;
-
-                                if (BOSS_HP === 0) {
-                                    delete this.boss;
-                                    this.ctx.drawImage(bossImages['Boss Dead.png'], boss.x, boss.y);
-                                    NUMBER_TIMES_BOSS_DIED += 1;
-                                    BOSS_HP_UPDATE += 20;
-                                    BOSS_HP = BOSS_HP_UPDATE;
-                                    this.setUpBoss();
-                                }
-                            }
+                if (this.beamDir) {
+                    ((boss.x + 399 >= this.beamDir.x) && (boss.x <= this.beamDir.x + 399) && (boss.y + 399 >= this.beamDir.y) && (boss.y <= this.beamDir.y + 399)) ? connect = true : connect = false;
+                    if (connect) {
+                        BOSS_HP -= 1;
+                        delete this.beamDir;
+                        if (BOSS_HP === 0) {
+                            this.ctx.drawImage(bossImages['Boss Dead.png'], boss.x, boss.y);
+                            delete this.boss;
+                            NUMBER_TIMES_BOSS_DIED += 1;
+                            BOSS_HP_UPDATE += 20;
+                            BOSS_HP = BOSS_HP_UPDATE;
+                            this.setUpBoss();
                         }
                     }
                 }
             });
-            //}
-            this.topAliens.forEach((topAlien, topAlienIdx) => {
-                if (topAlien.x + 99 >= this.beamDir.x) {
-                    if (topAlien.x <= this.beamDir.x + 99) {
-                        if (topAlien.y + 99 >= this.beamDir.y) {
-                            if (topAlien.y <= this.beamDir.y + 99) {
-                                delete this.topAliens[topAlienIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], topAlien.x - 25, topAlien.y - 25);
-                                // ALIENS_TO_KILL -= 1;
-                                // if (ALIENS_TO_KILL === 0) { levelOver(); }
-                                this.setupTopAliens();
-                                connect = true;
-                            }
-                        }
+            this.aliens.forEach((alien, alienIdx) => {
+                if (this.beamDir) {
+                    alien.x + 99 >= this.beamDir.x ? alien.x <= this.beamDir.x + 99 ? alien.y + 99 >= this.beamDir.y ? alien.y <= this.beamDir.y + 99 ? connect = true : connect : connect : connect : connect;
+                    if (connect) {
+                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], alien.x - 25, alien.y - 25);
+                        delete this.beamDir;
+                        delete this.aliens[alienIdx];
+                        this.setupAliens();
                     }
                 }
             });
-            this.bottomAliens.forEach((bottomAlien, bottomAlienIdx) => {
-                if (bottomAlien.x + 99 >= this.beamDir.x) {
-                    if (bottomAlien.x <= this.beamDir.x + 99) {
-                        if (bottomAlien.y + 99 >= this.beamDir.y) {
-                            if (bottomAlien.y <= this.beamDir.y + 99) {
-                                delete this.bottomAliens[bottomAlienIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], bottomAlien.x - 25, bottomAlien.y - 25);
-                                // ALIENS_TO_KILL -= 1;
-                                // if (ALIENS_TO_KILL === 0) { levelOver(); }
-                                this.setupBottomAliens();
-                                connect = true;
-                            }
-                        }
+            this.asteroids.forEach((asteroid, asteroidIdx) => {
+                if (this.beamDir) {
+                    asteroid.x + 99 >= this.beamDir.x ? asteroid.x <= this.beamDir.x + 99 ? asteroid.y + 99 >= this.beamDir.y ? asteroid.y <= this.beamDir.y + 99 ? connect = true : connect = false : connect = false : connect = false : connect = false;
+                    if (connect) {
+                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], asteroid.x - 25, asteroid.y - 25);
+                        delete this.beamDir;
+                        delete this.asteroids[asteroidIdx];
+                        this.setupAsteroids();
                     }
                 }
             });
-            this.leftAliens.forEach((leftAlien, leftAlienIdx) => {
-                if (leftAlien.x + 99 >= this.beamDir.x) {
-                    if (leftAlien.x <= this.beamDir.x + 99) {
-                        if (leftAlien.y + 99 >= this.beamDir.y) {
-                            if (leftAlien.y <= this.beamDir.y + 99) {
-                                delete this.leftAliens[leftAlienIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], leftAlien.x - 25, leftAlien.y - 25);
-                                // ALIENS_TO_KILL -= 1;
-                                // if (ALIENS_TO_KILL === 0) { levelOver(); }
-                                this.setupLeftAliens();
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-            this.rightAliens.forEach((rightAlien, rightAlienIdx) => {
-                if (rightAlien.x + 99 >= this.beamDir.x) {
-                    if (rightAlien.x <= this.beamDir.x + 99) {
-                        if (rightAlien.y + 99 >= this.beamDir.y) {
-                            if (rightAlien.y <= this.beamDir.y + 99) {
-                                delete this.rightAliens[rightAlienIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], rightAlien.x - 25, rightAlien.y - 25);
-                                // ALIENS_TO_KILL -= 1;
-                                // if (ALIENS_TO_KILL === 0) { levelOver(); }
-                                this.setupRightAliens();
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-            this.topAsteroids.forEach((topAsteroid, topAsteroidIdx) => {
-                if (topAsteroid.x + 99 >= this.beamDir.x) {
-                    if (topAsteroid.x <= this.beamDir.x + 99) {
-                        if (topAsteroid.y + 99 >= this.beamDir.y) {
-                            if (topAsteroid.y <= this.beamDir.y + 99) {
-                                delete this.topAsteroids[topAsteroidIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], topAsteroid.x - 25, topAsteroid.y - 25);
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-            this.bottomAsteroids.forEach((bottomAsteroid, bottomAsteroidIdx) => {
-                if (bottomAsteroid.x + 99 >= this.beamDir.x) {
-                    if (bottomAsteroid.x <= this.beamDir.x + 99) {
-                        if (bottomAsteroid.y + 99 >= this.beamDir.y) {
-                            if (bottomAsteroid.y <= this.beamDir.y + 99) {
-                                delete this.bottomAsteroids[bottomAsteroidIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], bottomAsteroid.x - 25, bottomAsteroid.y - 25);
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-            this.leftAsteroids.forEach((leftAsteroid, leftAsteroidIdx) => {
-                if (leftAsteroid.y + 99 >= this.beamDir.y) {
-                    if (leftAsteroid.y <= this.beamDir.y + 99) {
-                        if (leftAsteroid.x + 99 >= this.beamDir.x) {
-                            if (leftAsteroid.x <= this.beamDir.x + 99) {
-                                delete this.leftAsteroids[leftAsteroidIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], leftAsteroid.x - 25, leftAsteroid.y - 25);
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-            this.rightAsteroids.forEach((rightAsteroid, rightAsteroidIdx) => {
-                if (rightAsteroid.y + 99 >= this.beamDir.y) {
-                    if (rightAsteroid.y <= this.beamDir.y + 99) {
-                        if (rightAsteroid.x + 99 >= this.beamDir.x) {
-                            if (rightAsteroid.x <= this.beamDir.x + 99) {
-                                delete this.rightAsteroids[rightAsteroidIdx];
-                                this.ctx.drawImage(asteroidImages['asteroid dead.png'], rightAsteroid.x - 25, rightAsteroid.y - 25);
-                                connect = true;
-                            }
-                        }
-                    }
-                }
-            });
-
-            if (connect) { delete this.beamDir; }
         }
-
         if (this.isPlayerDead()) {
+            this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
             this.ctx.drawImage(backgroundImages['GAME OVER 2.jpg'], 0, 0);
-            this.ctx.font = 'bold 100px Impact';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText("SINISTAR HEALTH : " + BOSS_HP, 100, 100);
-            this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
-
-            document.addEventListener("keydown", e => {
-                if (e.keyCode === ENTER_CODE) {
-                    restart();
-                }
-            });
+            this.score();
         }
         else {
             this.lastFrame = Date.now();
-            this.ctx.font = 'bold 100px Impact';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText("SINISTAR HEALTH : " + BOSS_HP, 100, 100);
-            this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
+            this.score();
             requestAnimationFrame(this.gameLoop);
         }
     }
     isPlayerDead() {
         var isDead = false;
-        // return false;
-        //if ((LEVEL === 2) || (LEVEL > 3)) {
-        if (this.boss) {
-            this.boss.forEach((boss) => {
-                if (boss.x + 199 >= this.player.x) {
-                    if (boss.x <= this.player.x + 199) {
-                        if (boss.y + 199 >= this.player.y) {
-                            if (boss.y <= this.player.y + 199) {
-                                this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                                this.ctx.drawImage(backgroundImages['GAME OVER 2.jpg'], 0, 0);
-                                return isDead = true;
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        //}
-        this.topAliens.forEach((topAlien, topAlienIdx) => {
-            if (topAlien.x == this.player.x) {
-                if (topAlien.y + 99 >= this.player.y) {
-                    if (topAlien.y <= this.player.y + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
+        return false;
+        this.boss.forEach((boss) => {
+            boss.x + 199 >= this.player.x ? isDead = true : boss.x <= this.player.x + 199 ? isDead = true : boss.y + 199 >= this.player.y ? isDead = true : boss.y <= this.player.y + 199 ? isDead = true : isDead = false;
+            if (isDead) { return true; }
         });
-        this.bottomAliens.forEach((bottomAlien, bottomAlienIdx) => {
-            if (bottomAlien.x == this.player.x) {
-                if (bottomAlien.y + 99 >= this.player.y) {
-                    if (bottomAlien.y <= this.player.y + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
+        this.aliens.forEach((alien, alienIdx) => {
+            alien.x + 99 >= this.player.x ? isDead = true : alien.x <= this.player.x + 99 ? isDead = true : alien.y + 99 >= this.player.y ? isDead = true : alien.y <= this.player.y + 99 ? isDead = true : isDead = false;
+            if (isDead) { return true; }
         });
-        this.leftAliens.forEach((leftAlien, leftAlienIdx) => {
-            if (leftAlien.y == this.player.y) {
-                if (leftAlien.x + 99 >= this.player.x) {
-                    if (leftAlien.x <= this.player.x + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
-        });
-        this.rightAliens.forEach((rightAlien, rightAlienIdx) => {
-            if (rightAlien.y == this.player.y) {
-                if (rightAlien.x + 99 >= this.player.x) {
-                    if (rightAlien.x <= this.player.x + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
-        });
-        this.topAsteroids.forEach((topAsteroid, topAsteroidIdx) => {
-            if (topAsteroid.x == this.player.x) {
-                if (topAsteroid.y + 99 >= this.player.y) {
-                    if (topAsteroid.y <= this.player.y + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
-        });
-        this.bottomAsteroids.forEach((bottomAsteroid, bottomAsteroidIdx) => {
-            if (bottomAsteroid.x == this.player.x) {
-                if (bottomAsteroid.y + 99 >= this.player.y) {
-                    if (bottomAsteroid.y <= this.player.y + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
-        });
-        this.leftAsteroids.forEach((leftAsteroid, leftAsteroidIdx) => {
-            if (leftAsteroid.y == this.player.y) {
-                if (leftAsteroid.x + 99 >= this.player.x) {
-                    if (leftAsteroid.x <= this.player.x + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
-        });
-        this.rightAsteroids.forEach((rightAsteroid, rightAsteroidIdx) => {
-            if (rightAsteroid.y == this.player.y) {
-                if (rightAsteroid.x + 99 >= this.player.x) {
-                    if (rightAsteroid.x <= this.player.x + 99) {
-                        this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
-                        return isDead = true;
-                    }
-                }
-            }
+        this.asteroids.forEach((asteroid, asteroidIdx) => {
+            asteroid.x + 99 >= this.player.x ? isDead = true : asteroid.x <= this.player.x + 99 ? isDead = true : asteroid.y + 99 >= this.player.y ? isDead = true : asteroid.y <= this.player.y + 99 ? isDead = true : isDead = false;
+            if (isDead) { return true; }
         });
         return isDead;
     }
+    score() {
+        this.ctx.font = 'bold 100px Impact';
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillText("SINISTAR HEALTH : " + BOSS_HP, 100, 100);
+        this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
+    }
 }
-
-// Restarts the game after death
-function restart() {
-    location.reload();
-}
-
-// function levelOver() {
-
-//     // if (LEVEL === 2) { this.ctx.drawImage(['next level 2.jpg'], 0, 0); }
-//     // if (LEVEL === 3) { this.ctx.drawImage(['next level 3.jpg'], 0, 0); }
-//     // if (LEVEL === 4) { this.ctx.drawImage(['next level 4.jpg'], 0, 0); }
-//     // if (LEVEL === 5) { this.ctx.drawImage(['next level 5.jpg'], 0, 0); }
-//     // if (LEVEL === 6) { this.ctx.drawImage(['game won.jpg'], 0, 0); }
-// /*
-//     delete this.topAsteroids;
-//     delete this.bottomAsteroids;
-//     delete this.leftAsteroids;
-//     delete this.rightAsteroids;
-// */
-
-//     // if ((LEVEL === 2) || (LEVEL >= 4)) {
-//     //     delete this.boss[0];
-//     // }
-// /*
-//     delete this.topAliens;
-//     delete this.bottomAliens;
-//     delete this.leftAliens;
-//     delete this.rightAliens;
-// */
-//     LEVEL += 1;
-//     ALIENS_TO_KILL = LEVEL * 20;
-
-//     MAX_ASTEROIDS_TOP_BOTTOM = 10 * LEVEL;
-//     MAX_ASTEROIDS_LEFT_RIGHT = 6 * LEVEL;
-//     MAX_ALIENS = 5* LEVEL;
-
-
-//     document.addEventListener("keydown", e => {
-//         if (e.keyCode === ENTER_CODE) {
-//             gameEngine.start();
-//         }
-//     });
-// }
-
 // Starts the game
 var gameEngine = new Engine(document.getElementById('app'));
-
 document.addEventListener("keydown", e => {
     if (e.keyCode === ENTER_CODE) {
+        body.id = "";
         gameEngine.start();
     }
 });
+// Restarts the game after death
+/*
+document.addEventListener("keydown", e => {
+    if (e.keyCode === ENTER_CODE) { location.reload(); }
+});*/
