@@ -14,9 +14,9 @@ var MOVE_LEFT = 'left';
 var MOVE_RIGHT = 'right';
 var FIRE = 'fire';
 // General dimensions
-var GAME_WIDTH = 4500;
-var GAME_HEIGHT = 2900;
-var ENTITY_DIMENSIONS = 100;
+var GAME_WIDTH = 1125;
+var GAME_HEIGHT = 725;
+var ENTITY_DIMENSIONS = 25;
 //var LEVEL = 1;
 var PLAYER_STARTING_POSITION_X = (GAME_WIDTH - ENTITY_DIMENSIONS) / 2;
 var PLAYER_STARTING_POSITION_Y = (GAME_HEIGHT - ENTITY_DIMENSIONS) / 2;
@@ -25,14 +25,14 @@ var BOSS_HP = 20;
 var BOSS_HP_UPDATE = 20;
 var NUMBER_TIMES_BOSS_DIED = 0;
 // Basic enemy stats
-var alienCounter = 0;
+var alienCounter = 1;
 var MAX_ALIENS = 8;
 var MAX_ALIENS_UPDATE = 5;
 var NUMBER_WAVES_ALIENS_KILLED = 0;
 var NUMBER_ALIENS_IN_WAVE = 5;
 // Asteroid stats
 var asteroidCounter = 1;
-var MAX_ASTEROIDS = 10;
+var MAX_ASTEROIDS = 20;
 // Beam constants
 var MAX_BEAMS = 2;
 //var BEAM_SOUND = new sound("Pew_Pew.mp3");
@@ -129,12 +129,12 @@ class Boss {
         this.y = (Math.round(Math.random())) * GAME_HEIGHT;
     }
     update(xPlayerPos, yPlayerPos) {
-        this.x > xPlayerPos ? this.x -= 5 : this.x < xPlayerPos ? this.x += 5 : this.x;
-        this.y > yPlayerPos ? this.y -= 5 : this.y < yPlayerPos ? this.y += 5 : this.y;
+        this.x > xPlayerPos ? this.x -= 1 : this.x < xPlayerPos ? this.x += 1 : this.x;
+        this.y > yPlayerPos ? this.y -= 1 : this.y < yPlayerPos ? this.y += 1 : this.y;
     }
     render(ctx, counter) {
-        if (counter < 25) { ctx.drawImage(bossImages['Sinistar Boss 1.png'], this.x - 200, this.y - 200); }
-        if (25 <= counter) { ctx.drawImage(bossImages['Sinistar Boss 2.png'], this.x - 200, this.y - 200); }
+        if (counter < 25) { ctx.drawImage(bossImages['Sinistar Boss 1.png'], this.x - 50, this.y - 50); }
+        if (25 <= counter) { ctx.drawImage(bossImages['Sinistar Boss 2.png'], this.x - 50, this.y - 50); }
     }
 }
 
@@ -143,37 +143,37 @@ class Alien extends Render {
         super();
         this.sprite = enemyImages[randomAlien()];
         switch (alienSide) {
-            case 0:
+            case 1:
                 this.x = alienPos;
                 this.y = -ENTITY_DIMENSIONS;
                 break;
-            case 1:
+            case 2:
                 this.x = alienPos;
                 this.y = GAME_HEIGHT + ENTITY_DIMENSIONS;
                 break;
-            case 2:
+            case 3:
                 this.x = -ENTITY_DIMENSIONS;
                 this.y = alienPos;
                 break;
-            case 3:
+            case 4:
                 this.x = GAME_WIDTH + ENTITY_DIMENSIONS;
                 this.y = alienPos;
                 break;
         }
     }
     update(xPlayerPos, yPlayerPos) {
-        this.x > xPlayerPos ? this.x -= 3 : this.x < xPlayerPos ? this.x += 3 : this.x;
-        this.y > yPlayerPos ? this.y -= 3 : this.y < yPlayerPos ? this.y += 3 : this.y;
+        this.x > xPlayerPos ? this.x -= 0.5 : this.x < xPlayerPos ? this.x += 0.5 : this.x;
+        this.y > yPlayerPos ? this.y -= 0.5 : this.y < yPlayerPos ? this.y += 0.5 : this.y;
     }
 }
 
 class Asteroid extends Render {
-    constructor(asteroidPos, aCounter) {
+    constructor(asteroidPos, asteroidSide) {
         super();
         this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = Math.random() / 1.5;
-        this.thing = aCounter;
-        switch (aCounter) {
+        this.speed = (Math.random() + 0.01) / 2.5;
+        this.side = asteroidSide;
+        switch (asteroidSide) {
             case 1:
                 this.x = asteroidPos;
                 this.y = 0;
@@ -193,7 +193,7 @@ class Asteroid extends Render {
         }
     }
     update(timeDiff) {
-        switch (this.thing) {
+        switch (this.side) {
             case 1: return this.y = this.y + (timeDiff * this.speed);
             case 2: return this.y = this.y - (timeDiff * this.speed);
             case 3: return this.x = this.x + (timeDiff * this.speed);
@@ -236,7 +236,7 @@ class Player extends Render {
 class Beam extends Render {
     constructor(currentDir, xPlayerPos, yPlayerPos) {
         super();
-        this.speed = 5;
+        this.speed = 2;
         switch (currentDir) {
             case 1:
                 this.currentDir = currentDir;
@@ -310,21 +310,21 @@ class Engine {
         while (this.aliens.filter(e => !!e).length < MAX_ALIENS) { this.addAlien(); }
     }
     addAlien() {
-        var alienSpots = 30;
+        var alienSpots = 10;
         var alienSpot;
-        ++alienCounter;
-        if (alienCounter === 4) { alienCounter = 0; }
+        if (alienCounter === 5) { alienCounter = 1; }
         while (!alienSpot || this.aliens[alienSpot]) { alienSpot = Math.floor(Math.random() * alienSpots); }
         this.aliens[alienSpot] = new Alien((alienSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS, alienCounter);
+        ++alienCounter;
     }
     setupAsteroids() {
         if (!this.asteroids) { this.asteroids = []; }
         while (this.asteroids.filter(e => !!e).length < MAX_ASTEROIDS) { this.addAsteroid(); }
     }
     addAsteroid() {
-        if (asteroidCounter === 5) { asteroidCounter = 1; }
-        var asteroidSpots = 30;
+        var asteroidSpots = 37;
         var asteroidSpot;
+        if (asteroidCounter === 5) { asteroidCounter = 1; }
         while (!asteroidSpot || this.asteroids[asteroidSpot]) { asteroidSpot = Math.floor(Math.random() * asteroidSpots); }
         this.asteroids[asteroidSpot] = new Asteroid(((asteroidSpot * ENTITY_DIMENSIONS) - ENTITY_DIMENSIONS), asteroidCounter);
         ++asteroidCounter;
@@ -395,12 +395,13 @@ class Engine {
             this.beamDir.x < -ENTITY_DIMENSIONS ? delete this.beamDir : this.beamDir.x > GAME_WIDTH ? delete this.beamDir : this.beamDir.y < -ENTITY_DIMENSIONS ? delete this.beamDir : this.beamDir.y > GAME_HEIGHT ? delete this.beamDir : connect;
             this.boss.forEach((boss) => {
                 if (this.beamDir) {
-                    ((boss.x + 399 >= this.beamDir.x) && (boss.x <= this.beamDir.x + 399) && (boss.y + 399 >= this.beamDir.y) && (boss.y <= this.beamDir.y + 399)) ? connect = true : connect = false;
+                    ((boss.x + 74 >= this.beamDir.x) && (boss.x <= this.beamDir.x + 74) && (boss.y + 74 >= this.beamDir.y) && (boss.y <= this.beamDir.y + 74)) ? connect = true : connect = false;
                     if (connect) {
                         BOSS_HP -= 1;
+                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], this.beamDir.x - 6, this.beamDir.y - 6);
                         delete this.beamDir;
                         if (BOSS_HP === 0) {
-                            this.ctx.drawImage(bossImages['Boss Dead.png'], boss.x, boss.y);
+                            this.ctx.drawImage(bossImages['Boss Dead.png'], boss.x - 50, boss.y - 50);
                             delete this.boss;
                             NUMBER_TIMES_BOSS_DIED += 1;
                             BOSS_HP_UPDATE += 20;
@@ -412,9 +413,9 @@ class Engine {
             });
             this.aliens.forEach((alien, alienIdx) => {
                 if (this.beamDir) {
-                    alien.x + 99 >= this.beamDir.x ? alien.x <= this.beamDir.x + 99 ? alien.y + 99 >= this.beamDir.y ? alien.y <= this.beamDir.y + 99 ? connect = true : connect : connect : connect : connect;
+                    alien.x + 24 >= this.beamDir.x ? alien.x <= this.beamDir.x + 24 ? alien.y + 24 >= this.beamDir.y ? alien.y <= this.beamDir.y + 24 ? connect = true : connect : connect : connect : connect;
                     if (connect) {
-                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], alien.x - 25, alien.y - 25);
+                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], alien.x - 6, alien.y - 6);
                         delete this.beamDir;
                         delete this.aliens[alienIdx];
                         this.setupAliens();
@@ -423,9 +424,9 @@ class Engine {
             });
             this.asteroids.forEach((asteroid, asteroidIdx) => {
                 if (this.beamDir) {
-                    asteroid.x + 99 >= this.beamDir.x ? asteroid.x <= this.beamDir.x + 99 ? asteroid.y + 99 >= this.beamDir.y ? asteroid.y <= this.beamDir.y + 99 ? connect = true : connect = false : connect = false : connect = false : connect = false;
+                    asteroid.x + 24 >= this.beamDir.x ? asteroid.x <= this.beamDir.x + 24 ? asteroid.y + 24 >= this.beamDir.y ? asteroid.y <= this.beamDir.y + 24 ? connect = true : connect = false : connect = false : connect = false : connect = false;
                     if (connect) {
-                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], asteroid.x - 25, asteroid.y - 25);
+                        this.ctx.drawImage(asteroidImages['asteroid dead.png'], asteroid.x - 6, asteroid.y - 6);
                         delete this.beamDir;
                         delete this.asteroids[asteroidIdx];
                         this.setupAsteroids();
@@ -434,7 +435,7 @@ class Engine {
             });
         }
         if (this.isPlayerDead()) {
-            this.ctx.drawImage(playerImages['player dead.png'], this.player.x - 100, this.player.y - 100);
+            this.ctx.drawImage(playerImages['player dead.png'], this.player.x - ENTITY_DIMENSIONS, this.player.y - ENTITY_DIMENSIONS);
             this.ctx.drawImage(backgroundImages['GAME OVER 2.jpg'], 0, 0);
             this.score();
         }
@@ -446,26 +447,25 @@ class Engine {
     }
     isPlayerDead() {
         var isDead = false;
-        return false;
         this.boss.forEach((boss) => {
-            boss.x + 199 >= this.player.x ? isDead = true : boss.x <= this.player.x + 199 ? isDead = true : boss.y + 199 >= this.player.y ? isDead = true : boss.y <= this.player.y + 199 ? isDead = true : isDead = false;
+            boss.x + 49 >= this.player.x ? isDead = true : boss.x <= this.player.x + 49 ? isDead = true : boss.y + 49 >= this.player.y ? isDead = true : boss.y <= this.player.y + 49 ? isDead = true : isDead = false;
             if (isDead) { return true; }
         });
         this.aliens.forEach((alien, alienIdx) => {
-            alien.x + 99 >= this.player.x ? isDead = true : alien.x <= this.player.x + 99 ? isDead = true : alien.y + 99 >= this.player.y ? isDead = true : alien.y <= this.player.y + 99 ? isDead = true : isDead = false;
+            alien.x + 24 >= this.player.x ? isDead = true : alien.x <= this.player.x + 24 ? isDead = true : alien.y + 24 >= this.player.y ? isDead = true : alien.y <= this.player.y + 24 ? isDead = true : isDead = false;
             if (isDead) { return true; }
         });
         this.asteroids.forEach((asteroid, asteroidIdx) => {
-            asteroid.x + 99 >= this.player.x ? isDead = true : asteroid.x <= this.player.x + 99 ? isDead = true : asteroid.y + 99 >= this.player.y ? isDead = true : asteroid.y <= this.player.y + 99 ? isDead = true : isDead = false;
+            asteroid.x + 24 >= this.player.x ? isDead = true : asteroid.x <= this.player.x + 24 ? isDead = true : asteroid.y + 24 >= this.player.y ? isDead = true : asteroid.y <= this.player.y + 24 ? isDead = true : isDead = false;
             if (isDead) { return true; }
         });
         return isDead;
     }
     score() {
-        this.ctx.font = 'bold 100px Impact';
+        this.ctx.font = 'bold 25px Impact';
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText("SINISTAR HEALTH : " + BOSS_HP, 100, 100);
-        this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 100, 200);
+        this.ctx.fillText("SINISTAR HEALTH : " + BOSS_HP, 25, 25);
+        this.ctx.fillText("SINISTAR KILLED : " + NUMBER_TIMES_BOSS_DIED + "/5", 25, 50);
     }
 }
 // Starts the game
