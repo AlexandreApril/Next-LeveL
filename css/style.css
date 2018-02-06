@@ -3,7 +3,10 @@ body {
     text-align: center;
     background-color: black;
     background-repeat: no-repeat;
-    background-image: url("../images/background images/game start 2.jpg");
     background-size: 4500px, 2900px;
     background-position: center;
+}
+
+#bodyBackground {
+    background-image: url("../images/background images/game start 2.jpg");
 }
