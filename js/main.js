@@ -203,7 +203,13 @@ class Player extends Render {
         super();
         this.x = PLAYER_STARTING_POSITION_X;
         this.y = PLAYER_STARTING_POSITION_Y;
-        this.speed = LEVEL;
+        switch (LEVEL) {
+            case 1: this.speed = 3;
+            case 2: this.speed = 4;
+            case 3:
+            case 4:
+            case 5: this.speed = 5;
+        }
         this.sprite = playerImages['player fly up.png'];
     }
     // This method is called by the game engine when up/down/left/right arrows are pressed
@@ -211,22 +217,22 @@ class Player extends Render {
         if (direction === MOVE_UP && this.y > 0) {
             this.arrowPressed = 1;
             this.sprite = playerImages['player fly up.png'];
-            this.y = this.y - ENTITY_DIMENSIONS;
+            // this.y = this.y - ENTITY_DIMENSIONS;
         }
         else if (direction === MOVE_DOWN && this.y < GAME_HEIGHT - ENTITY_DIMENSIONS) {
             this.arrowPressed = 2;
             this.sprite = playerImages['player fly down.png'];
-            this.y = this.y + ENTITY_DIMENSIONS;
+            // this.y = this.y + ENTITY_DIMENSIONS;
         }
         else if (direction === MOVE_LEFT && this.x > 0) {
             this.arrowPressed = 3;
             this.sprite = playerImages['player fly left.png'];
-            this.x = this.x - ENTITY_DIMENSIONS;
+            // this.x = this.x - ENTITY_DIMENSIONS;
         }
         else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - ENTITY_DIMENSIONS) {
             this.arrowPressed = 4;
             this.sprite = playerImages['player fly right.png'];
-            this.x = this.x + ENTITY_DIMENSIONS;
+            // this.x = this.x + ENTITY_DIMENSIONS;
         }
     }
     update() {
