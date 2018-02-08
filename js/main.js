@@ -203,7 +203,7 @@ class Player extends Render {
         super();
         this.x = PLAYER_STARTING_POSITION_X;
         this.y = PLAYER_STARTING_POSITION_Y;
-        this.speed = 5;
+        this.speed = LEVEL;
         this.sprite = playerImages['player fly up.png'];
     }
     // This method is called by the game engine when up/down/left/right arrows are pressed
