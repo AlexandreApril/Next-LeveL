@@ -101,7 +101,7 @@ function randomAsteroid() {
         case 7: return 'asteroid 8.png';
         case 8: return 'asteroid 9.png';
         case 9: return 'asteroid 10.png';
-        case 10: return 'asteroid 11.png';
+        case 10: return 'asteroid 1.png';
     }
 }
 
