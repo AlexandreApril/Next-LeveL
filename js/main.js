@@ -204,7 +204,7 @@ class Player extends Render {
         this.x = PLAYER_STARTING_POSITION_X;
         this.y = PLAYER_STARTING_POSITION_Y;
         switch (LEVEL) {
-            case 1: this.speed = 2;
+            case 1: this.speed = 1.5;
             case 2: this.speed = 3;
             case 3:
             case 4:
@@ -401,7 +401,7 @@ class Engine {
             var timeDiff = currentFrame - this.lastFrame;
             switch (LEVEL) {
                 case 1: this.ctx.drawImage(backgroundImages['background level 1.jpg'], 0, 0); break;
-                case 2: this.ctx.drawImage(backgroundImages['background level 2.jpg'], 0, 0); break;
+                case 2: this.ctx.drawImage(backgroundImages['background level 1.jpg'], 0, 0); break;
                 case 3: this.ctx.drawImage(backgroundImages['background level 3.jpg'], 0, 0); break;
                 case 4: this.ctx.drawImage(backgroundImages['background level 4.jpg'], 0, 0); break;
                 case 5: this.ctx.drawImage(backgroundImages['background level 5.jpg'], 0, 0); break;
