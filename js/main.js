@@ -511,13 +511,19 @@ class Engine {
             }
             switch (LEVEL) {
                 case 1:
+                    if (NUMBER_ALIENS_KILLED === TOTAL_NUMBER_ALIENS * LEVEL) {
+                        NUMBER_ALIENS_KILLED = 0;
+                        this.aliens.forEach((alien, alienIdx) => { delete this.aliens[alienIdx]; });
+                        this.asteroids.forEach((asteroid, asteroidIdx) => { delete this.asteroids[asteroidIdx]; });
+                        this.ctx.drawImage(backgroundImages['next level 2.jpg'], 0, 0);
+                        LEVEL_OVER = true;
+                    }
                 case 2:
                     if (NUMBER_ALIENS_KILLED === TOTAL_NUMBER_ALIENS * LEVEL) {
                         NUMBER_ALIENS_KILLED = 0;
                         this.aliens.forEach((alien, alienIdx) => { delete this.aliens[alienIdx]; });
                         this.asteroids.forEach((asteroid, asteroidIdx) => { delete this.asteroids[asteroidIdx]; });
-                        if (LEVEL === 1) { this.ctx.drawImage(backgroundImages['next level 2.jpg'], 0, 0); }
-                        if (LEVEL === 2) { this.ctx.drawImage(backgroundImages['next level 3.jpg'], 0, 0); }
+                        this.ctx.drawImage(backgroundImages['next level 3.jpg'], 0, 0);
                         LEVEL_OVER = true;
                     }
                     break;
