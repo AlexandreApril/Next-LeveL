@@ -168,7 +168,7 @@ class Asteroid extends Render {
     constructor(asteroidPos, asteroidSide) {
         super();
         this.sprite = asteroidImages[randomAsteroid()];
-        this.speed = (Math.random() + 0.01) / 2.5;
+        this.speed = (Math.random() + 0.01);
         this.side = asteroidSide;
         switch (asteroidSide) {
             case 1:
@@ -191,10 +191,10 @@ class Asteroid extends Render {
     }
     update(timeDiff) {
         switch (this.side) {
-            case 1: return this.y = this.y + (timeDiff * this.speed);
-            case 2: return this.y = this.y - (timeDiff * this.speed);
-            case 3: return this.x = this.x + (timeDiff * this.speed);
-            case 4: return this.x = this.x - (timeDiff * this.speed);
+            case 1: return this.y = this.y + (timeDiff * this.speed) / 2.5;
+            case 2: return this.y = this.y - (timeDiff * this.speed) / 2.5;
+            case 3: return this.x = this.x + (timeDiff * this.speed) / 2.5;
+            case 4: return this.x = this.x - (timeDiff * this.speed) / 2.5;
         }
     }
 }
