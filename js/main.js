@@ -34,7 +34,7 @@ var TOTAL_BOSS_DEATHS_NEEDED = 5;
 var alienCounter = 1;
 var MAX_ALIENS = 5;
 var NUMBER_ALIENS_KILLED = 0;
-var TOTAL_NUMBER_ALIENS = 25;
+var TOTAL_NUMBER_ALIENS = 15;
 // Asteroid stats
 var asteroidCounter = 1;
 var MAX_ASTEROIDS = 10;
@@ -204,8 +204,8 @@ class Player extends Render {
         this.x = PLAYER_STARTING_POSITION_X;
         this.y = PLAYER_STARTING_POSITION_Y;
         switch (LEVEL) {
-            case 1: this.speed = 3;
-            case 2: this.speed = 4;
+            case 1: this.speed = 2;
+            case 2: this.speed = 3;
             case 3:
             case 4:
             case 5: this.speed = 5;
