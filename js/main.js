@@ -131,8 +131,8 @@ class Boss {
         this.y > yPlayerPos ? this.y -= this.speed : this.y < yPlayerPos ? this.y += this.speed : this.y;
     }
     render(ctx, COUNTER) {
-        if (COUNTER < 25) { ctx.drawImage(bossImages["https://i.imgur.com/kjgSsc0.gif"], this.x - 50, this.y - 50); }
-        if (25 <= COUNTER) { ctx.drawImage(bossImages["https://i.imgur.com/kjgSsc0.gif"], this.x - 50, this.y - 50); }
+        if (COUNTER < 25) { ctx.drawImage(bossImages['Sinistar Boss 1.png'], this.x - 50, this.y - 50); }
+        if (25 <= COUNTER) { ctx.drawImage(bossImages['Sinistar Boss 2.png'], this.x - 50, this.y - 50); }
     }
 }
 class Alien extends Render {
